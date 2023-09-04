@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment 1</title>
+</head>
+
+<body>
+    <h1>Result Page</h1>
+    {{ sample_data | safe }}
+    <h4> No. of Features: {{ no_of_features }} </h4>
+    <h4> No. of Numerical Features: {{ no_of_numerical_features }} </h4>
+    <h4> No. of Qualitative Features: {{ no_of_qualitative_features }} </h4>
+
+    {{ other_stats | safe }}
+
+    <h4> Skew : </h4>
+    {{ skew | safe }}
+    <h4> Kurtosis : </h4>
+    {{ kurtosis | safe }}
+</body>
+
+</html>
