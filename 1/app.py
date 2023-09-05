@@ -11,7 +11,6 @@ from stats import (
 
 app = Flask(__name__)
 
-
 def get_statistics(data: pandas.DataFrame):
     stats = {}
 
@@ -19,10 +18,13 @@ def get_statistics(data: pandas.DataFrame):
     stats["no_of_numerical_features"] = no_of_numerical_features(data)
     stats["no_of_qualitative_features"] = no_of_qualitative_features(data)
 
-    stats["skew"] = data.select_dtypes(include=[numpy.number]).skew().to_frame().to_html()
-    stats["kurtosis"] = data.select_dtypes(include=[numpy.number]).kurtosis().to_frame().to_html()
+    # stats["skew"] = data.select_dtypes(include=[numpy.number]).skew().to_frame().to_html()
+    # stats["kurtosis"] = data.select_dtypes(include=[numpy.number]).kurtosis().to_frame().to_html()
 
-    stats["other_stats"] = find_stats_of_all_numerical_columns(data).to_html()
+    # stats["other_stats"] = find_stats_of_all_numerical_columns(data).to_html()
+    stats["stats"] = find_stats_of_all_numerical_columns(data)
+
+    print(stats)
 
     return stats
 
@@ -39,11 +41,9 @@ def result_page():
         data_bytes = BytesIO(data_file)
         data = pandas.read_csv(data_bytes)
 
-        feature_data = data[data.columns.values[1:]]
+        # feature_data = data[data.columns.values[1:]]
 
-        stats = get_statistics(feature_data)
-
-        print(data.head().to_html())
+        stats = get_statistics(data)
 
         values = {"sample_data": data.head().to_html(), **stats}
 

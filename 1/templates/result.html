@@ -14,12 +14,27 @@
     <h4> No. of Numerical Features: {{ no_of_numerical_features }} </h4>
     <h4> No. of Qualitative Features: {{ no_of_qualitative_features }} </h4>
 
-    {{ other_stats | safe }}
+    <h3>Stats:</h3>
 
-    <h4> Skew : </h4>
-    {{ skew | safe }}
-    <h4> Kurtosis : </h4>
-    {{ kurtosis | safe }}
+    {% for class in stats %}
+    <h4> For class "{{ class }}" :- </h4>
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; column-gap: 1fr;">
+        <div>
+            <h5> Basic Stats </h5>
+            {{ stats[class]["other"] | safe }}
+        </div>
+        <div>
+            <h5> Skew </h5>
+            {{ stats[class]["skew"] | safe }}
+        </div>
+        <div>
+            <h5> Kurtosis </h5>
+            {{ stats[class]["kurtosis"] | safe }}
+        </div>
+    </div>
+    <br/>
+    <hr style="border: 1px solid black; width: 100%;"/>
+    {% endfor %}
 </body>
 
 </html>
