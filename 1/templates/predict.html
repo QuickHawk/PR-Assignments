@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction</title>
+</head>
+
+<body>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; justify-items: center">
+        <a href="/"> Upload new CSV</a>
+        <a href="/result"> Result Page </a>
+        <a href="/class-wise"> Go to class wise distribution </a>
+    </div><br />
+    <form method="post" action="/predict">
+        <h1> Provide the following numerical values for prediction : </h1>
+        <h3> {{ ", ".join(numerical_column_names[0]) }} </h3>
+        <textarea name="input"></textarea>
+        <button> Submit </button>
+    </form>
+    {% if results %}
+    {% for _class in results %}
+    <div>
+        <h3>
+            For {{ _class }}: PDF = {{ results[_class] }} <br />
+        </h3>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 1fr;">
+        <div>
+            Covariance
+            {{ stats[_class]["covariance"] | safe }}
+        </div>
+        <div>
+            Stats
+            {{ stats[_class]["other"] | safe }}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</body>
+
+</html>

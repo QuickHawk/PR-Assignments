@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class wise distribution</title>
+</head>
+<body>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; justify-items: center;">
+        <a href="/result"> <--- Results </a>
+        <a href="/predict"> Predict --> </a>
+    </div>
+
+    <h3>Stats:</h3>
+
+    {% for _class in stats %}
+    <h4> For class "{{ _class }}" :- </h4>
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; column-gap: 1fr;">
+        <div>
+            <h5> Basic Stats </h5>
+            {{ stats[_class]["other"] | safe }}
+        </div>
+        <div>
+            <h5> Skew </h5>
+            {{ stats[_class]["skew"] | safe }}
+        </div>
+        <div>
+            <h5> Kurtosis </h5>
+            {{ stats[_class]["kurtosis"] | safe }}
+        </div>
+        <div>
+            <h5> Covariance </h5>
+            {{ stats[_class]["covariance"] | safe }}
+        </div>
+        <div>
+            <h5> Correlation </h5>
+            {{ stats[_class]["correlation"] | safe }}
+        </div>
+    </div>
+    <br/>
+    <hr style="border: 1px solid black; width: 100%;"/>
+    {% endfor %}
+</body>
+</html>
