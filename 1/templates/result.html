@@ -9,11 +9,18 @@
 
 <body>
     <h1>Result Page</h1>
+    {% include 'nav.html' %}
+    <br/>
     {{ sample_data | safe }}
     <h4> No. of Features: {{ no_of_features }} </h4>
+    <h4> Features : {{ ", ".join(list_of_features) }}</h4><br/>
     <h4> No. of Numerical Features: {{ no_of_numerical_features }} </h4>
+    <h4> Numerical Features : {{ ", ".join(list_of_numerical_features) }} </h4><br/>
     <h4> No. of Qualitative Features: {{ no_of_qualitative_features }} </h4>
-    <a href="/class-wise"> Class wise Distribution -></a>
+    <h4> Qualitative Features : {{ ", ".join(list_of_qualitative_features) }}</h4>
+    <br/>
+    <h4> No. of classes : {{ n_labels }}</h4>
+    <h4> Classes : {{ ", ".join(labels) }} </h4>
 </body>
 
 </html>

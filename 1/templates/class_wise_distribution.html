@@ -6,17 +6,16 @@
     <title>Class wise distribution</title>
 </head>
 <body>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; justify-items: center;">
-        <a href="/result"> <--- Results </a>
-        <a href="/predict"> Predict --> </a>
-    </div>
+
+    <h1> Class Wise Stats </h1>
+
+    {% include 'nav.html' %}
 
     <h3>Stats:</h3>
 
     {% for _class in stats %}
     <h4> For class "{{ _class }}" :- </h4>
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; column-gap: 1fr;">
+    <div style="display: flex; justify-content: space-evenly; flex-wrap: wrap; align-items: center">
         <div>
             <h5> Basic Stats </h5>
             {{ stats[_class]["other"] | safe }}

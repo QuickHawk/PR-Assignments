@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Stats</title>
+</head>
+<body>
+    <div>
+        <h1> Feature Stats </h1>
+        {% include 'nav.html' %}
+        <div style="display: flex;justify-content:space-evenly;flex-wrap: wrap;">
+            {% for feat, feat_data in feature_stats.items() %}
+                <div>
+                    <h3>
+                        For Feature "{{ feat }}":
+                    </h3>
+                    {{ feat_data.to_html() | safe }}
+                </div>
+            {% endfor %}
+        </div>
+        <br/>
+    </div>
+</body>
+</html>

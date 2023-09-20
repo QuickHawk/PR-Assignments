@@ -8,17 +8,15 @@
 </head>
 
 <body>
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; justify-items: center">
-        <a href="/"> Upload new CSV</a>
-        <a href="/result"> Result Page </a>
-        <a href="/class-wise"> Go to class wise distribution </a>
-    </div><br />
+    <h1> Prediction </h1>
+    {% include 'nav.html' %}
     <form method="post" action="/predict">
         <h1> Provide the following numerical values for prediction : </h1>
         <h3> {{ ", ".join(numerical_column_names[0]) }} </h3>
         <textarea name="input"></textarea>
         <button> Submit </button>
     </form>
+    <img src="data:image/png;base64,{{ img_data }}" />
     {% if results %}
     {% for _class in results %}
     <div>
