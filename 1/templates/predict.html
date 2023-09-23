@@ -12,16 +12,19 @@
     {% include 'nav.html' %}
     <form method="post" action="/predict">
         <h1> Provide the following numerical values for prediction : </h1>
-        <h3> {{ ", ".join(numerical_column_names[0]) }} </h3>
+        <h3> {{ ", ".join(data.columns.values[1:]) }} </h3>
         <textarea name="input"></textarea>
         <button> Submit </button>
     </form>
+    {% if results_num %}
     <img src="data:image/png;base64,{{ img_data }}" />
-    {% if results %}
-    {% for _class in results %}
+    {% for _class in results_num.keys() %}
     <div>
         <h3>
-            For {{ _class }}: PDF = {{ results[_class] }} <br />
+            For "{{ _class }}": <br/><br/>
+            
+            Numerical PDF = {{ results_num[_class] }} <br />
+            Qualitative Probability = {{ results_qual[_class] }} <br/>
         </h3>
     </div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 1fr;">

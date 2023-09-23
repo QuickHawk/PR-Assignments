@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect
 import pandas
 from flask_session import Session
 import numpy
@@ -12,7 +12,9 @@ from stats import (
     feature_wise_stats,
     image_encodings,
     get_confusion_matrix,
-    confusion_matrix_plot_encoded
+    confusion_matrix_plot_encoded,
+    qual_features_probabilities,
+    bayes_pred
 )
 
 app = Flask(__name__)
@@ -52,27 +54,56 @@ def home():
     return render_template("index.html")
 
 
-@app.route("/result", methods=["GET", "POST"])
-def result_page():
+@app.route("/select-columns", methods = ["GET", "POST"])
+def select_columns():
+
+    params = {}
+
+    if "data" not in session or "data_orig" not in session:
+        return render_template("error_page.html")
+    
+    data_orig = session["data_orig"]
+    data = session["data"]
+
+    available_columns = data_orig.columns.values[1:]
+    params["available_columns"] = available_columns
+
+    if "selected_columns" not in params:
+        selected_columns = data.columns.values[1:]
+        params["selected_columns"] = selected_columns
+
+    if request.method == "POST":
+        class_column = data_orig.columns.values[0]
+
+        selected_columns = request.form.getlist("columns")
+        params["selected_columns"] = selected_columns
+
+        session["data"] = session["data_orig"][[class_column, *selected_columns]]
+        session["selected_features"] = selected_columns
+
+    return render_template("select_columns.html", **params)
+
+@app.route("/upload", methods=["POST"])
+def upload():
     if request.method == "POST":
         data_file = request.files["data"].read()
         data_bytes = BytesIO(data_file)
         data = pandas.read_csv(data_bytes)
 
-        if "data" in session:
-            session.pop("data")
         session["data"] = data
+        session["data_orig"] = data
 
-    elif "data" in session:
-        data = session["data"]
-    else:
+    return redirect("select-columns")
+
+@app.route("/result", methods=["GET", "POST"])
+def result_page():
+   
+    if "data" not in session:
         return render_template("error_page.html")
         
+    data = session["data"]
     stats = get_statistics(data)
     values = {"sample_data": data.sample(5).to_html(), **stats}
-
-    if "values" in session:
-        session.pop("values")
 
     session["values"] = values
 
@@ -80,10 +111,16 @@ def result_page():
 
 @app.route("/class-wise")
 def class_wise_distribution():
-    if "values" in session:
-        return render_template("class_wise_distribution.html", **session["values"])
-    else:
+
+    if "data" not in session:
         return render_template("error_page.html")
+
+    data = session["data"]
+
+    stats = get_statistics(data)
+    session["values"] = stats
+
+    return render_template("class_wise_distribution.html", **session["values"])
 
 @app.route("/feature-wise")
 def feature_wise_distribution():
@@ -94,6 +131,16 @@ def feature_wise_distribution():
     feature_stats = feature_wise_stats(data)
 
     return render_template("feature_wise_distribution.html", feature_stats=feature_stats)
+
+@app.route("/qualitative_features")
+def qual_feat():
+    if "data" not in session:
+        return render_template("error_page.html")
+    
+    data = session["data"]
+    qual_data_prob = qual_features_probabilities(data)
+
+    return render_template("qual_features.html", qual_data = qual_data_prob)
 
 @app.route("/plots")
 def boxplots():
@@ -111,21 +158,35 @@ def predict():
 
     if "data" not in session:
         return render_template("error_page.html")
+    
+    data = session["data"]
+    print(data.columns.values)
+    values["data"] = data
 
     if request.method == "POST":
-        data = session["data"]
         input_x_string = request.form["input"]
 
         input_x = pandas.read_csv(StringIO(input_x_string), header=None)
-
+        input_x.columns = data.columns.values[1:]
+        
         if not input_x.empty:
-            results = predict_gaussian(data, input_x)
-            values["results"] = results
+            
+            qual_feat = qual_features_probabilities(data)
+            results_num = predict_gaussian(data, input_x.select_dtypes(include=[numpy.number]))
+            results_qual = bayes_pred(data, input_x.select_dtypes(exclude=[numpy.number]), qual_feat)
+
+            print(results_num)
+            print(results_qual)
+
+            values["results_num"] = results_num
+            values["results_qual"] = results_qual
 
         conf_matrix, list_of_classes = get_confusion_matrix(data, 0.3)
         img_data = confusion_matrix_plot_encoded(conf_matrix, list_of_classes)
 
         values["img_data"] = img_data
+
+    # values["qualitative_prob"] = qual_features_probabilities(data)
 
     return render_template("predict.html", **values)
 

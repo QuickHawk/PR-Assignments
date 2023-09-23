@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qualitative Features</title>
+</head>
+<body>
+    <h1> Qualitative Features Probabilities </h1>
+    {% include "nav.html" %}
+    {% for feat in qual_data.keys() %}
+    <div>
+        <h4> For "{{ feat }}" </h4>
+        {{ qual_data[feat].to_html() | safe }}
+    </div>
+    {% endfor %}
+</body>
+</html>

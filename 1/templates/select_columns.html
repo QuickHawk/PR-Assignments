@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Columns</title>
+</head>
+<body>
+    <h2> Feature Selection : </h2>
+    {% include 'nav.html' %}
+    <form method="post" action="select-columns">
+        <h3> Select Features : </h3>
+        {% for column in available_columns %}
+            <div>
+                <input 
+                    type="checkbox" 
+                    name="columns" 
+                    id="{{ column }}"
+                    value="{{ column }}"
+                    {{ "checked" if column in selected_columns }}
+                />
+                <label for="{{ column }}"> {{column}}</label> 
+                <!-- <br/> -->
+            </div>
+        {% endfor %}
+        <button> Update Columns list </button>
+    </form>
+    <div>
+        <h3> Available Columns : </h3>
+        <h4><i>
+            {{ ", ".join(available_columns) }}
+        </i></h4>
+    </div>
+    <div>
+        <h3> Currently Selected Columns : </h3>
+        <h4><i>
+            {{ ", ".join(selected_columns) }}
+        </i></h4>
+    </div>
+</body>
+</html>

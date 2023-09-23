@@ -1,7 +1,7 @@
 import pandas
 import numpy
 from scipy.stats import multivariate_normal 
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix, ConfusionMatrixDisplay
 from matplotlib import pyplot
 import matplotlib
 from io import BytesIO
@@ -45,14 +45,17 @@ def predict_gaussian(data: pandas.DataFrame, x):
     list_of_classes = data.iloc[:, 0].unique()
     results = {}
 
+    # print(data)
+    # print(x)
+
     for _class in list_of_classes:
         class_data = data[data.iloc[:, 0] == _class]
-        class_numeric_data = class_data.select_dtypes(include=[numpy.number])
+        class_numeric_data = class_data.iloc[:, 1:].select_dtypes(include=[numpy.number])
 
         class_cov = class_numeric_data.cov(ddof=0)
         class_mean = class_numeric_data.mean()
 
-        y = multivariate_normal.pdf(x, class_mean, class_cov)
+        y = multivariate_normal.pdf(x, class_mean, class_cov, allow_singular=True)
 
         results[_class] = y
     
@@ -91,10 +94,8 @@ def confusion_matrix_plot_encoded(conf_matrix, list_of_classes):
     
     fig, ax = pyplot.subplots()
 
-    seaborn.heatmap(conf_matrix, annot=True, xticklabels=list_of_classes, yticklabels=list_of_classes, ax=ax)
-
-    pyplot.xlabel("Actual")
-    pyplot.ylabel("Predicted")
+    t = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=list_of_classes)
+    t.plot(ax=ax)
 
     temp_file = BytesIO()
     fig.set_figheight(5)
@@ -146,19 +147,88 @@ def get_confusion_matrix(data: pandas.DataFrame, split_ratio = 0.2):
         train_mean = train_x.mean()
         train_cov = train_x.cov(ddof=0)
 
-        predicted_y[:, idx] = multivariate_normal.pdf(test_x, train_mean, train_cov)
+        predicted_y[:, idx] = multivariate_normal.pdf(test_x, train_mean, train_cov, allow_singular=True)
 
     actual_y = [list_of_classes.index(row) for row in actual_y]
     predicted_y = numpy.argmax(predicted_y, axis=1).tolist()
 
-    print(actual_y)
-    print(predicted_y)
-    # print(actual_y, predicted_y)
-
     conf_matrix = confusion_matrix(actual_y, predicted_y)
 
-    # pyplot.imshow(conf_matrix)
-
-
     return conf_matrix, list_of_classes
-    # return [] 
+
+def qual_features_probabilities(data: pandas.DataFrame):
+    
+    label_column_name = data.columns.values[0]
+
+    list_of_qual_features = data.iloc[:,1:].select_dtypes(exclude=[numpy.number]).columns.values
+    list_of_classes = data.iloc[:,0].unique()
+
+    prob_data = {}
+
+    for feat in list_of_qual_features:
+        list_of_values = data[feat].unique()
+        t = pandas.DataFrame(index=list_of_classes, columns=list_of_values)
+        for _class in list_of_classes:
+            _class_data = data[data[label_column_name] == _class]
+            for val in list_of_values:
+                _temp_data = _class_data[_class_data[feat] == val]
+                prob = len(_temp_data) / len(_class_data)
+                # print(f"Probability of {val} for feature {feat} of class {_class}: {prob}")
+                
+                t.loc[_class, val] = prob
+
+        prob_data[feat] = t
+
+    return prob_data
+
+def bayes_pred(data:pandas.DataFrame, input_x: pandas.DataFrame, qual_features_probability: dict[str, pandas.DataFrame]):
+    
+    denom = 0
+    result = {}
+
+    prob_class = {}
+
+    list_of_classes = data.iloc[:, 0].unique()
+    label_column_name = data.columns.values[0]
+
+    for _class in list_of_classes:
+        p = data[data[label_column_name] == _class].shape[0] / data.shape[0]
+        prob_class[_class] = p
+    
+    for _class in list_of_classes:
+        prod = 1
+        for _feat in input_x.columns.values:
+            val = input_x[_feat]
+            p = qual_features_probability[_feat].loc[_class, val].iloc[0]
+            prod *= p
+
+        prod *= prob_class[_class]
+        denom += prod
+
+    for _class in list_of_classes:
+        num = 1
+        for _feat in input_x.columns.values:
+            val = input_x[_feat]
+            p = qual_features_probability[_feat].loc[_class, val].iloc[0]
+            num *= p
+
+        num *= prob_class[_class]
+        # print(f"For class {_class} : {num/denom}")
+        result[_class] = num/denom
+
+    return result
+
+if __name__ == "__main__":
+
+    data = pandas.read_csv("csv/bayes_example.csv")
+
+    qual_feat = qual_features_probabilities(data)
+
+    input_x = pandas.DataFrame([["X", "Y"]], columns=data.columns.values[1:])
+
+    # print(input_x)
+
+    bayes_pred(data, input_x, qual_feat)
+
+
+    
