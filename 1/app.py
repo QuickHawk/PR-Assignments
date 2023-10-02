@@ -8,11 +8,11 @@ from stats import (
     no_of_numerical_features,
     no_of_qualitative_features,
     find_stats_of_all_numerical_columns,
-    predict_gaussian,
+    pdf,
     feature_wise_stats,
-    image_encodings,
-    get_confusion_matrix,
-    confusion_matrix_plot_encoded,
+    image_data,
+    confusion_matrix_data,
+    confusion_matrix_plot_data,
     qual_features_probabilities,
     bayes_pred
 )
@@ -22,31 +22,30 @@ app.secret_key = "Testing 123"
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-def get_statistics(data: pandas.DataFrame):
-    stats = {}
+def fetch_statistics(data: pandas.DataFrame):
+    statistics_dict = {}
 
     nFeatures = no_of_features(data)
     nNumericalFeatures = no_of_numerical_features(data)
     nQualitativeFeatures = no_of_qualitative_features(data)
 
-    stats["list_of_features"] = nFeatures
-    stats["no_of_features"] = len(nFeatures)
-    stats["list_of_numerical_features"] = nNumericalFeatures
-    stats["no_of_numerical_features"] = len(nNumericalFeatures)
-    stats["list_of_qualitative_features"] = nQualitativeFeatures
-    stats["no_of_qualitative_features"] = len(nQualitativeFeatures)
+    statistics_dict["list_of_features"] = nFeatures
+    statistics_dict["no_of_features"] = len(nFeatures)
 
-    stats["labels"] = data.iloc[:,0].unique().astype(str).tolist()
-    stats["n_labels"] = len(stats["labels"])
+    statistics_dict["list_of_numerical_features"] = nNumericalFeatures
+    statistics_dict["no_of_numerical_features"] = len(nNumericalFeatures)
 
-    stats["stats"] = find_stats_of_all_numerical_columns(data)
+    statistics_dict["list_of_qualitative_features"] = nQualitativeFeatures
+    statistics_dict["no_of_qualitative_features"] = len(nQualitativeFeatures)
 
-    stats["numerical_column_names"] = data.iloc[:,1:].select_dtypes(include=[numpy.number]).columns.values.tolist(),
+    statistics_dict["labels"] = data.iloc[:,0].unique().astype(str).tolist()
+    statistics_dict["n_labels"] = len(statistics_dict["labels"])
 
+    statistics_dict["stats"] = find_stats_of_all_numerical_columns(data)
 
-    # print(stats)
+    statistics_dict["numerical_column_names"] = data.iloc[:,1:].select_dtypes(include=[numpy.number]).columns.values.tolist(),
 
-    return stats
+    return statistics_dict
 
 
 @app.route("/")
@@ -102,7 +101,7 @@ def result_page():
         return render_template("error_page.html")
         
     data = session["data"]
-    stats = get_statistics(data)
+    stats = fetch_statistics(data)
     values = {"sample_data": data.sample(5).to_html(), **stats}
 
     session["values"] = values
@@ -117,7 +116,7 @@ def class_wise_distribution():
 
     data = session["data"]
 
-    stats = get_statistics(data)
+    stats = fetch_statistics(data)
     session["values"] = stats
 
     return render_template("class_wise_distribution.html", **session["values"])
@@ -148,7 +147,7 @@ def boxplots():
         return render_template("error_page.html")
 
     data = session['data']
-    encodings = image_encodings(data)
+    encodings = image_data(data)
 
     return render_template('boxplots.html', encodings = encodings)
 
@@ -172,21 +171,20 @@ def predict():
         if not input_x.empty:
             
             qual_feat = qual_features_probabilities(data)
-            results_num = predict_gaussian(data, input_x.select_dtypes(include=[numpy.number]))
+            results_num = pdf(data, input_x.select_dtypes(include=[numpy.number]))
             results_qual = bayes_pred(data, input_x.select_dtypes(exclude=[numpy.number]), qual_feat)
 
             print(results_num)
             print(results_qual)
 
             values["results_num"] = results_num
+            values["infer"] = max(results_num, key=lambda x: results_num[x])
             values["results_qual"] = results_qual
 
-        conf_matrix, list_of_classes = get_confusion_matrix(data, 0.3)
-        img_data = confusion_matrix_plot_encoded(conf_matrix, list_of_classes)
+        conf_matrix, list_of_classes = confusion_matrix_data(data, 0.3)
+        img_data = confusion_matrix_plot_data(conf_matrix, list_of_classes)
 
         values["img_data"] = img_data
-
-    # values["qualitative_prob"] = qual_features_probabilities(data)
 
     return render_template("predict.html", **values)
 

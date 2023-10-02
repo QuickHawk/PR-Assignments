@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 
 <body>
@@ -16,29 +17,29 @@
         <textarea name="input"></textarea>
         <button> Submit </button>
     </form>
-    {% if results_num %}
-    <img src="data:image/png;base64,{{ img_data }}" />
-    {% for _class in results_num.keys() %}
-    <div>
-        <h3>
-            For "{{ _class }}": <br/><br/>
-            
-            Numerical PDF = {{ results_num[_class] }} <br />
-            Qualitative Probability = {{ results_qual[_class] }} <br/>
-        </h3>
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 1fr;">
-        <div>
-            Covariance
-            {{ stats[_class]["covariance"] | safe }}
+    <div style="display: flex; ">
+        {% if results_num %}
+        <img src="data:image/png;base64,{{ img_data }}" />
+        <div style="display: flex; flex-direction: column">
+            {% for _class in results_num.keys() %}
+            <div>
+                <h3>
+                    For "{{ _class }}": <br /><br />
+                </h3>
+                <h4>
+                    Normal PDF = {{ results_num[_class] }} <br />
+                    <!-- Qualitative Probability = {{ results_qual[_class] }} <br/> -->
+                </h4>
+            </div>
+            {% endfor %}
         </div>
-        <div>
-            Stats
-            {{ stats[_class]["other"] | safe }}
+        <div style="display:flex; justify-items:center; text-align: center;">
+            <h4>
+                Hence, we can say the given input is of class <q>{{ infer }}</q>
+            </h4>
         </div>
+        {% endif %}
     </div>
-    {% endfor %}
-    {% endif %}
 </body>
 
 </html>

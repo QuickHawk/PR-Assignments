@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class wise distribution</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
 
@@ -19,14 +20,6 @@
         <div>
             <h5> Basic Stats </h5>
             {{ stats[_class]["other"] | safe }}
-        </div>
-        <div>
-            <h5> Skew </h5>
-            {{ stats[_class]["skew"] | safe }}
-        </div>
-        <div>
-            <h5> Kurtosis </h5>
-            {{ stats[_class]["kurtosis"] | safe }}
         </div>
         <div>
             <h5> Covariance </h5>

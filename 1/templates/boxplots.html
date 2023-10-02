@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Plots </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
     <h1> Plots </h1>
     {% include 'nav.html' %}
     <br />
-    <div>
+    <div class="side_to_side" style="justify-items: center;">
         {% for enc in encodings %}
-            <img src="data:image/png;base64,{{ enc }}" alt="Box Plot">
+            <img src="data:image/png;base64,{{ enc }}" alt="Box Plot" height="400" width="400">
         {% endfor %}
     </div>
 </body>

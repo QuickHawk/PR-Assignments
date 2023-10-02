@@ -5,22 +5,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assignment 1</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 
-<body>
+<body style="display: flex; flex-direction: column; align-items: center;">
     <h1>Result Page</h1>
     {% include 'nav.html' %}
     <br/>
     {{ sample_data | safe }}
-    <h4> No. of Features: {{ no_of_features }} </h4>
-    <h4> Features : {{ ", ".join(list_of_features) }}</h4><br/>
-    <h4> No. of Numerical Features: {{ no_of_numerical_features }} </h4>
-    <h4> Numerical Features : {{ ", ".join(list_of_numerical_features) }} </h4><br/>
-    <h4> No. of Qualitative Features: {{ no_of_qualitative_features }} </h4>
-    <h4> Qualitative Features : {{ ", ".join(list_of_qualitative_features) }}</h4>
-    <br/>
-    <h4> No. of classes : {{ n_labels }}</h4>
-    <h4> Classes : {{ ", ".join(labels) }} </h4>
+    <h3> Feature Info:- </h3>
+    <table style="width: 50%">
+        <tr>
+          <td><strong>No. of Features:</strong></td>
+          <td>{{ no_of_features }}</td>
+        </tr>
+        <tr>
+          <td><strong>Features:</strong></td>
+          <td>{{ ", ".join(list_of_features) }}</td>
+        </tr>
+        <tr>
+          <td><strong>No. of Numerical Features:</strong></td>
+          <td>{{ no_of_numerical_features }}</td>
+        </tr>
+        <tr>
+          <td><strong>Numerical Features:</strong></td>
+          <td>{{ ", ".join(list_of_numerical_features) }}</td>
+        </tr>
+        <tr>
+          <td><strong>No. of Qualitative Features:</strong></td>
+          <td>{{ no_of_qualitative_features }}</td>
+        </tr>
+        <tr>
+          <td><strong>Qualitative Features:</strong></td>
+          <td>{{ ", ".join(list_of_qualitative_features) }}</td>
+        </tr>
+        <tr>
+          <td><strong>No. of classes:</strong></td>
+          <td>{{ n_labels }}</td>
+        </tr>
+        <tr>
+          <td><strong>Classes:</strong></td>
+          <td>{{ ", ".join(labels) }}</td>
+        </tr>
+      </table>
+      
 </body>
 
 </html>
